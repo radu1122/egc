@@ -92,7 +92,7 @@ void tema1::Init()
     playerAngle = 0;
 
 
-    Mesh* square1 = object2D::CreateSquare("square1", corner, squareSide, glm::vec3(1, 0, 0), true);
+    Mesh* square1 = object2D::CreateSquare("square1", corner, squareSide, glm::vec3(.5f, 0, .5f), true);
     AddMeshToList(square1);
 
     Mesh* squareEye = object2D::CreateSquare("squareEye", corner, squareSide, glm::vec3(151, 1, 0), true);
@@ -107,6 +107,20 @@ void tema1::Init()
 
     Mesh* proiectil = object2D::CreateSquare("proiectil", corner, squareSide, glm::vec3(0, 0, 0), true);
     AddMeshToList(proiectil);
+    addObstacles();
+
+
+    Mesh* enemy = object2D::CreateSquare("enemy", corner, squareSide, glm::vec3(1, 0, 0), true);
+    AddMeshToList(enemy);
+    addObstacles();
+
+    Mesh* exteriorHealthBar = object2D::CreateSquare("exteriorHealthBar", corner, squareSide, glm::vec3(1, 0, 0), false);
+    AddMeshToList(exteriorHealthBar);
+    addObstacles();
+
+
+    Mesh* healthBar = object2D::CreateSquare("healthBar", corner, squareSide, glm::vec3(.5f, .5f, .5f), true);
+    AddMeshToList(healthBar);
     addObstacles();
 }
 
@@ -168,12 +182,14 @@ void tema1::Update(float deltaTimeSeconds)
     visMatrix = glm::mat3(1);
     visMatrix *= VisualizationTransf2DUnif(logicSpace, viewSpace);
 
-
+ 
     if (playerDead) {
         glClearColor(1, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         return;
     }
+
+    // update pos proiectile
     for (auto it = projectiles.begin(); it != projectiles.end(); ) {
         if (Engine::GetElapsedTime() - it->time > 1) {
             it = projectiles.erase(it);
@@ -192,6 +208,76 @@ void tema1::Update(float deltaTimeSeconds)
         projectiles[i].x += cos(projectiles[i].angle) * deg2rad * 4;
         projectiles[i].y += sin(projectiles[i].angle) * deg2rad * 4;
     }
+
+
+    // generare inamici
+    double currTime = Engine::GetElapsedTime();
+    if (currTime - lastTimeEnemy > 2) {
+        lastTimeEnemy = currTime;
+        int randPos = rand() / 100;
+        float positionX = sin(2 * PI / 100 * randPos) * logicSpace.width / 2 + logicSpace.width / 2;
+        float positionY = cos(2 * PI / 100 * randPos) * logicSpace.width / 2 + logicSpace.height / 2;
+        float angle = atan2(playerY - positionY, playerX - positionX);
+
+        enemy enemy;
+        enemy.x = positionX;
+        enemy.y = positionY;
+        enemy.angle = angle;
+        enemies.push_back(enemy);
+    }
+
+    // update pos inamici
+    for (int i = 0; i < enemies.size(); i++) {
+        enemies[i].x += cos(enemies[i].angle) * deg2rad * 3;
+        enemies[i].y += sin(enemies[i].angle) * deg2rad * 3;
+
+        float angle = atan2(playerY - enemies[i].y, playerX - enemies[i].x);
+        enemies[i].angle = angle;
+    }
+
+    // collision inamic cu player
+    for (auto it = enemies.begin(); it != enemies.end(); ) {
+        bool collisionX = playerX + .2f >= it->x &&
+            it->x + .15f >= playerX;
+        bool collisionY = playerY + .2f >= it->y &&
+            it->y + .15f >= playerY;
+        if (collisionX && collisionY) {
+            health = health - 1;
+            if (health <= 0) {
+                playerDead = true;
+            }
+            it = enemies.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+
+    // collision inimici cu proiectile
+    for (auto it = enemies.begin(); it != enemies.end(); ) {
+        bool deletedEnemy = false;
+        for (auto it2 = projectiles.begin(); it2 != projectiles.end(); ) {
+
+            bool collisionX = it2->x + collisionOffset >= it->x &&
+                it->x + .15f >= it2->x;
+            bool collisionY = it2->y + collisionOffset >= it->y &&
+                it->y + .15f >= it2->y;
+            if (collisionX && collisionY) {
+                it = enemies.erase(it);
+                it2 = projectiles.erase(it2);
+                deletedEnemy = true;
+                score++;
+                cout << "Scorul este: " << score << "\n";
+            }
+            else {
+                ++it2;
+            }
+        }
+        if (!deletedEnemy) {
+            ++it;
+        }
+    }
+    
     DrawScene(visMatrix);
 }
 
@@ -240,8 +326,30 @@ void tema1::DrawScene(glm::mat3 visMatrix)
         float angle = atan2(playerY - projectiles[i].y, playerX - projectiles[i].x);
         modelMatrix = visMatrix * transform2D::Translate(projectiles[i].x, projectiles[i].y);
         modelMatrix *= transform2D::Rotate(angle);
-        RenderMesh2D(meshes["proiectil"], shaders["VertexColor"], modelMatrix * transform2D::Scale(.15f, .15f));
+        RenderMesh2D(meshes["proiectil"], shaders["VertexColor"], modelMatrix * transform2D::Scale(.3f, .3f));
     }
+
+    //inamici
+    for (int i = 0; i < enemies.size(); i++) {
+        float angle = atan2(playerY - enemies[i].y, playerX - enemies[i].x);
+        modelMatrix = visMatrix * transform2D::Translate(enemies[i].x, enemies[i].y);
+        modelMatrix *= transform2D::Rotate(angle + PI / 2);
+        modelMatrix *= transform2D::Scale(.35f, .35f);
+
+        RenderMesh2D(meshes["enemy"], shaders["VertexColor"], modelMatrix);
+    }
+
+    modelMatrix = visMatrix * transform2D::Translate(12, 1) * transform2D::Scale(.2, 10 * .5f);
+    RenderMesh2D(meshes["exteriorHealthBar"], shaders["VertexColor"], modelMatrix);
+
+    modelMatrix = visMatrix * transform2D::Translate(12.05f, 1) * transform2D::Scale(.09f, health * .5f);
+    RenderMesh2D(meshes["healthBar"], shaders["VertexColor"], modelMatrix);
+
+    if (score > 0) {
+        modelMatrix = visMatrix * transform2D::Translate(1, .3f) * transform2D::Scale(score * .1f, .3f);
+        RenderMesh2D(meshes["healthBar"], shaders["VertexColor"], modelMatrix);
+    }
+
 
 }
 
@@ -317,16 +425,11 @@ void tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 bool tema1::isObjectCollision(float x, float y) {
     bool collisionX = false, collisionY = false, general = false;
     for (int i = 0; i < obstacoles.size(); i++) {
-        //collisionX = obstacoles[i].x + collisionOffset + obstacoles[i].scaleX >= playerX &&
-        //    playerX + collisionOffset + obstacoles[i].scaleX >= obstacoles[i].x;
-        //collisionY = obstacoles[i].y + collisionOffset + obstacoles[i].scaleY >= playerY &&
-        //    playerY + collisionOffset + obstacoles[i].scaleY >= obstacoles[i].y;
 
         collisionX = x + collisionOffset >= obstacoles[i].x &&
             obstacoles[i].x + obstacoles[i].scaleX >= x;
-        // collision y-axis?
         collisionY = y + collisionOffset >= obstacoles[i].y &&
-            obstacoles[i].y + obstacoles[i].scaleX >= y;
+            obstacoles[i].y + obstacoles[i].scaleY >= y;
         if (collisionX && collisionY) {
             general = true;
         }
@@ -362,9 +465,9 @@ void tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
         double currTime = Engine::GetElapsedTime();
         proiectil.time = currTime;
 
-        if (currTime - lastTime > .2f) {
+        if (currTime - lastTimeShoot > .2f) {
             projectiles.push_back(proiectil);
-            lastTime = currTime;
+            lastTimeShoot = currTime;
         }
     };
 }

@@ -74,6 +74,11 @@ namespace m1
         float angle;
         double time;
     };
+    struct enemy {
+        float x;
+        float y;
+        float angle;
+    };
      protected:
         float length;
         ViewportSpace viewSpace;
@@ -90,8 +95,12 @@ namespace m1
         float cx, cy;
         std::vector<obstacol> obstacoles;
         std::vector<projectile> projectiles;
+        std::vector<enemy> enemies;
+        int health = 10;
+        int score = 0;
 
         float collisionOffset = .65f;
-        double lastTime = 0;
+        double lastTimeShoot = 0;
+        double lastTimeEnemy = 0;
     };
 }   // namespace m1
