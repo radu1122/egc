@@ -78,6 +78,7 @@ namespace m1
         float x;
         float y;
         float angle;
+        float speed;
     };
      protected:
         float length;
@@ -99,7 +100,7 @@ namespace m1
         int health = 10;
         int score = 0;
 
-        float collisionOffset = .65f;
+        float collisionOffset = .3f;
         double lastTimeShoot = 0;
         double lastTimeEnemy = 0;
     };

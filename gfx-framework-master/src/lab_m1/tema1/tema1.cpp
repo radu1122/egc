@@ -69,7 +69,7 @@ void tema1::Init()
 {
     glm::ivec2 resolution = window->GetResolution();
     auto camera = GetSceneCamera();
-    camera->SetOrthographic(0, resolutionX, 0, resolutionY, 0.01f, 400);
+    camera->SetOrthographic(0, resolution.x, 0, resolution.y, 0.01f, 400);
     camera->SetPosition(glm::vec3(0, 0, 50));
     camera->SetRotation(glm::vec3(0, 0, 0));
     camera->Update();
@@ -77,8 +77,10 @@ void tema1::Init()
 
     logicSpace.x = 0;
     logicSpace.y = 0;
-    logicSpace.width = (float)12.8;
-    logicSpace.height = (float)7.2;
+    logicSpace.width = (float)12.8 / 3;
+    logicSpace.height = (float)7.2 / 3;
+
+
 
     float squareSide = 1;
 
@@ -98,7 +100,7 @@ void tema1::Init()
     Mesh* squareEye = object2D::CreateSquare("squareEye", corner, squareSide, glm::vec3(151, 1, 0), true);
     AddMeshToList(squareEye);
 
-    Mesh* mapMargin = object2D::CreateSquare("mapMargin", corner, squareSide, glm::vec3(.115f, .180f, .246f), true);
+    Mesh* mapMargin = object2D::CreateSquare("mapMargin", corner, squareSide, glm::vec3(.8f, .8f, .2f), true);
     AddMeshToList(mapMargin);
 
     Mesh* obstacolMesh = object2D::CreateSquare("obstacol", corner, squareSide, glm::vec3(0, 1, 0), true);
@@ -219,17 +221,22 @@ void tema1::Update(float deltaTimeSeconds)
         float positionY = cos(2 * PI / 100 * randPos) * logicSpace.width / 2 + logicSpace.height / 2;
         float angle = atan2(playerY - positionY, playerX - positionX);
 
+        float speed = 1.0f + rand() % (10);
+
+
         enemy enemy;
         enemy.x = positionX;
         enemy.y = positionY;
         enemy.angle = angle;
+        enemy.speed = speed;
+
         enemies.push_back(enemy);
     }
 
     // update pos inamici
     for (int i = 0; i < enemies.size(); i++) {
-        enemies[i].x += cos(enemies[i].angle) * deg2rad * 3;
-        enemies[i].y += sin(enemies[i].angle) * deg2rad * 3;
+        enemies[i].x += cos(enemies[i].angle) * deg2rad * enemies[i].speed;
+        enemies[i].y += sin(enemies[i].angle) * deg2rad * enemies[i].speed;
 
         float angle = atan2(playerY - enemies[i].y, playerX - enemies[i].x);
         enemies[i].angle = angle;
@@ -242,11 +249,11 @@ void tema1::Update(float deltaTimeSeconds)
         bool collisionY = playerY + .2f >= it->y &&
             it->y + .15f >= playerY;
         if (collisionX && collisionY) {
+            it = enemies.erase(it);
             health = health - 1;
             if (health <= 0) {
                 playerDead = true;
             }
-            it = enemies.erase(it);
         }
         else {
             ++it;
@@ -268,6 +275,7 @@ void tema1::Update(float deltaTimeSeconds)
                 deletedEnemy = true;
                 score++;
                 cout << "Scorul este: " << score << "\n";
+                break;
             }
             else {
                 ++it2;
@@ -290,7 +298,7 @@ void tema1::FrameEnd()
 void tema1::DrawScene(glm::mat3 visMatrix)
 {
 
-    float scale = .5f;
+    float scale = .3f;
     modelMatrix = visMatrix * transform2D::Translate(playerX, playerY);
     modelMatrix *= transform2D::Scale(scale, scale);
 
@@ -298,21 +306,36 @@ void tema1::DrawScene(glm::mat3 visMatrix)
     modelMatrix *= transform2D::Rotate(playerAngle);
     modelMatrix *= transform2D::Translate(-cx, -cy);
 
+    // player
     RenderMesh2D(meshes["squareEye"], shaders["VertexColor"], modelMatrix * transform2D::Translate(.7f, .0) * transform2D::Scale(.3f, .3f));
     RenderMesh2D(meshes["squareEye"], shaders["VertexColor"], modelMatrix * transform2D::Translate(.7f, .7f) * transform2D::Scale(.3f, .3f));
     RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
 
+    // health bar
+    modelMatrix = visMatrix * transform2D::Translate(playerX + 1.7f, playerY - 1) * transform2D::Scale(.1, 10 * .2f);
+    RenderMesh2D(meshes["exteriorHealthBar"], shaders["VertexColor"], modelMatrix);
+
+    modelMatrix = visMatrix * transform2D::Translate(playerX + 1.71f, playerY - 1) * transform2D::Scale(.08f, health * .2f);
+    RenderMesh2D(meshes["healthBar"], shaders["VertexColor"], modelMatrix);
+
+    // scor
+    if (score > 0) {
+        modelMatrix = visMatrix * transform2D::Translate(playerX - 2, playerY - 1) * transform2D::Scale(score * .1f, .1f);
+        RenderMesh2D(meshes["healthBar"], shaders["VertexColor"], modelMatrix);
+    }
+
+
 
     // margini harta
-    modelMatrix = visMatrix * transform2D::Translate(0, 0) * transform2D::Scale(.1f, logicSpace.height);
+    modelMatrix = visMatrix * transform2D::Translate(0, 0) * transform2D::Scale(.1f, 7.2f);
     RenderMesh2D(meshes["mapMargin"], shaders["VertexColor"], modelMatrix);
-    modelMatrix = visMatrix * transform2D::Translate(logicSpace.width -.1f, 0) * transform2D::Scale(.1f, logicSpace.height);
+    modelMatrix = visMatrix * transform2D::Translate(12.8f -.1f, 0) * transform2D::Scale(.1f, 7.2f);
     RenderMesh2D(meshes["mapMargin"], shaders["VertexColor"], modelMatrix);
-    modelMatrix = visMatrix * transform2D::Translate(0, 0) * transform2D::Scale(logicSpace.width, .1f);
+    modelMatrix = visMatrix * transform2D::Translate(0, 0) * transform2D::Scale(12.8f, .1f);
     RenderMesh2D(meshes["mapMargin"], shaders["VertexColor"], modelMatrix);
-    modelMatrix = visMatrix * transform2D::Translate(0, 0) * transform2D::Scale(logicSpace.width, .1f);
+    modelMatrix = visMatrix * transform2D::Translate(0, 0) * transform2D::Scale(12.8f, .1f);
     RenderMesh2D(meshes["mapMargin"], shaders["VertexColor"], modelMatrix);
-    modelMatrix = visMatrix * transform2D::Translate(0, logicSpace.height - .1f) * transform2D::Scale(logicSpace.width, .1f);
+    modelMatrix = visMatrix * transform2D::Translate(0, 7.2f - .1f) * transform2D::Scale(12.8f, .1f);
     RenderMesh2D(meshes["mapMargin"], shaders["VertexColor"], modelMatrix);
 
     // obstacole
@@ -326,7 +349,7 @@ void tema1::DrawScene(glm::mat3 visMatrix)
         float angle = atan2(playerY - projectiles[i].y, playerX - projectiles[i].x);
         modelMatrix = visMatrix * transform2D::Translate(projectiles[i].x, projectiles[i].y);
         modelMatrix *= transform2D::Rotate(angle);
-        RenderMesh2D(meshes["proiectil"], shaders["VertexColor"], modelMatrix * transform2D::Scale(.3f, .3f));
+        RenderMesh2D(meshes["proiectil"], shaders["VertexColor"], modelMatrix * transform2D::Scale(.08f, .08f));
     }
 
     //inamici
@@ -334,22 +357,13 @@ void tema1::DrawScene(glm::mat3 visMatrix)
         float angle = atan2(playerY - enemies[i].y, playerX - enemies[i].x);
         modelMatrix = visMatrix * transform2D::Translate(enemies[i].x, enemies[i].y);
         modelMatrix *= transform2D::Rotate(angle + PI / 2);
-        modelMatrix *= transform2D::Scale(.35f, .35f);
+        modelMatrix *= transform2D::Scale(.15f, .15f);
 
         RenderMesh2D(meshes["enemy"], shaders["VertexColor"], modelMatrix);
     }
 
-    modelMatrix = visMatrix * transform2D::Translate(12, 1) * transform2D::Scale(.2, 10 * .5f);
-    RenderMesh2D(meshes["exteriorHealthBar"], shaders["VertexColor"], modelMatrix);
 
-    modelMatrix = visMatrix * transform2D::Translate(12.05f, 1) * transform2D::Scale(.09f, health * .5f);
-    RenderMesh2D(meshes["healthBar"], shaders["VertexColor"], modelMatrix);
-
-    if (score > 0) {
-        modelMatrix = visMatrix * transform2D::Translate(1, .3f) * transform2D::Scale(score * .1f, .3f);
-        RenderMesh2D(meshes["healthBar"], shaders["VertexColor"], modelMatrix);
-    }
-
+   
 
 }
 
@@ -365,26 +379,39 @@ void tema1::OnInputUpdate(float deltaTime, int mods)
     deltaTime = deltaTime * 2;
     if (window->KeyHold(GLFW_KEY_W)) {
         playerY += deltaTime;
+        logicSpace.y += deltaTime;
+
         if (isObjectCollision(playerX, playerY)) {
             playerY -= deltaTime;
+            logicSpace.y -= deltaTime;
+
         }
     }
     if (window->KeyHold(GLFW_KEY_A)) {
         playerX -= deltaTime;
+        logicSpace.x -= deltaTime;
+
         if (isObjectCollision(playerX, playerY)) {
             playerX += deltaTime;
+            logicSpace.x += deltaTime;
         }
     }
     if (window->KeyHold(GLFW_KEY_S)) {
         playerY -= deltaTime;
+        logicSpace.y -= deltaTime;
+
         if (isObjectCollision(playerX, playerY)) {
             playerY += deltaTime;
+            logicSpace.y += deltaTime;
         }
     }
     if (window->KeyHold(GLFW_KEY_D)) {
         playerX += deltaTime;
+        logicSpace.x += deltaTime;
+
         if (isObjectCollision(playerX, playerY)) {
             playerX -= deltaTime;
+            logicSpace.x -= deltaTime;
         }
     }
     if (window->KeyHold(GLFW_KEY_Z)) {
@@ -416,8 +443,12 @@ void tema1::OnKeyRelease(int key, int mods)
 void tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
     // Add mouse move event
-    float coordinateX = mouseX * logicSpace.width / resolutionX - playerX;
-    float coordinateY = (logicSpace.height - mouseY * logicSpace.height / resolutionY) - playerY;
+    glm::ivec2 resolution = window->GetResolution();
+
+    float playerXLocal = logicSpace.width / 2;
+    float playerYLocal = logicSpace.height / 2;
+    float coordinateX = mouseX * logicSpace.width / resolution.x - playerXLocal;
+    float coordinateY = (logicSpace.height - mouseY * logicSpace.height / resolution.y) - playerYLocal;
 
     playerAngle = atan2f(coordinateY, coordinateX);
 }
@@ -439,7 +470,7 @@ bool tema1::isObjectCollision(float x, float y) {
         return true;
     }
     else {
-        if (x <= .1f || x >= 12.2f || y <= .1f || y >= 6.6f) {
+        if (x <= .1f || x >= 12.2f || y <= .1f || y >= 6.8f) {
             return true;
         }
     }
@@ -454,10 +485,16 @@ void tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
     if (IS_BIT_SET(button, GLFW_MOUSE_BUTTON_LEFT)) {
         projectile proiectil;
 
-        float coordinateX = mouseX * logicSpace.width / resolutionX - playerX;
-        float coordinateY = (logicSpace.height - mouseY * logicSpace.height / resolutionY) - playerY;
+        glm::ivec2 resolution = window->GetResolution();
 
-        float angle = atan2f(coordinateY, coordinateX);
+        float playerXLocal = logicSpace.width / 2;
+        float playerYLocal = logicSpace.height / 2;
+        float coordinateX = mouseX * logicSpace.width / resolution.x - playerXLocal;
+        float coordinateY = (logicSpace.height - mouseY * logicSpace.height / resolution.y) - playerYLocal;
+        //float coordinateX = mouseX * logicSpace.width / resolutionX - playerX;
+        //float coordinateY = (logicSpace.height - mouseY * logicSpace.height / resolutionY) - playerY;
+
+        float angle = atan2f(coordinateY - .1f, coordinateX - .1f);
 
         proiectil.x = playerX + .25f;
         proiectil.y = playerY + .25f;
@@ -465,7 +502,7 @@ void tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
         double currTime = Engine::GetElapsedTime();
         proiectil.time = currTime;
 
-        if (currTime - lastTimeShoot > .2f) {
+        if (currTime - lastTimeShoot > .1f) {
             projectiles.push_back(proiectil);
             lastTimeShoot = currTime;
         }

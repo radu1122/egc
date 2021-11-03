@@ -24,35 +24,26 @@ Lab3_Vis2D::Lab3_Vis2D()
 Lab3_Vis2D::~Lab3_Vis2D()
 {
 }
-glm::vec2 mouseCoordinates;
-float cx, cy;
+
+
 void Lab3_Vis2D::Init()
 {
-    glm::ivec2 resolution = window->GetResolution();
     auto camera = GetSceneCamera();
-    camera->SetOrthographic(0, (float)resolution.x, 0, (float)resolution.y, 0.01f, 400);
     camera->SetPosition(glm::vec3(0, 0, 50));
     camera->SetRotation(glm::vec3(0, 0, 0));
     camera->Update();
     GetCameraInput()->SetActive(false);
 
-    logicSpace.x = 1;       // logic x
-    logicSpace.y = 1;       // logic y
+    logicSpace.x = 0;       // logic x
+    logicSpace.y = 0;       // logic y
     logicSpace.width = 4;   // logic width
     logicSpace.height = 4;  // logic height
 
-    glm::vec3 corner = glm::vec3(0, 0, 0);
+    glm::vec3 corner = glm::vec3(0.001, 0.001, 0);
+    length = 0.99f;
 
-    float squareSide = 100;
-
-    cx = corner.x + squareSide / 2;
-    cy = corner.y + squareSide / 2;
-    Mesh* square1 = object2D::CreateSquare("square1", corner, squareSide, glm::vec3(1, 0, 0), true);
+    Mesh* square1 = object2D::CreateSquare("square1", corner, length, glm::vec3(1, 0, 0));
     AddMeshToList(square1);
-
-    Mesh* squareEye = object2D::CreateSquare("squareEye", corner, squareSide, glm::vec3(0, 1, 0), true);
-    AddMeshToList(squareEye);
-
 }
 
 
@@ -76,14 +67,14 @@ glm::mat3 Lab3_Vis2D::VisualizationTransf2D(const LogicSpace & logicSpace, const
 glm::mat3 Lab3_Vis2D::VisualizationTransf2DUnif(const LogicSpace & logicSpace, const ViewportSpace & viewSpace)
 {
     float sx, sy, tx, ty, smin;
-    sx = viewSpace.width;
-    sy = viewSpace.height;
+    sx = viewSpace.width / logicSpace.width;
+    sy = viewSpace.height / logicSpace.height;
     if (sx < sy)
         smin = sx;
     else
         smin = sy;
-    tx = viewSpace.x - viewSpace.width;
-    ty = viewSpace.y - viewSpace.height;
+    tx = viewSpace.x - smin * logicSpace.x + (viewSpace.width - smin * logicSpace.width) / 2;
+    ty = viewSpace.y - smin * logicSpace.y + (viewSpace.height - smin * logicSpace.height) / 2;
 
     return glm::transpose(glm::mat3(
         smin, 0.0f, tx,
@@ -114,53 +105,32 @@ void Lab3_Vis2D::FrameStart()
     // Clears the color buffer (using the previously set color) and depth buffer
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glm::ivec2 resolution = window->GetResolution();
-    // Sets the screen area where to draw
-    glViewport(0, 0, resolution.x, resolution.y);
 }
 
-float angularStep = 0;
+
 void Lab3_Vis2D::Update(float deltaTimeSeconds)
 {
     glm::ivec2 resolution = window->GetResolution();
 
     // Sets the screen area where to draw - the left half of the window
-    viewSpace = ViewportSpace(0, 0, resolution.x, resolution.y);
+    viewSpace = ViewportSpace(0, 0, resolution.x / 2, resolution.y);
     SetViewportArea(viewSpace, glm::vec3(0), true);
 
     // Compute the 2D visualization matrix
     visMatrix = glm::mat3(1);
-    visMatrix *= VisualizationTransf2D(logicSpace, viewSpace) * transform2D::Scale(.005f, .005f) * transform2D::Translate(resolution.x / 2, resolution.y / 2);
-    float sx, sy, tx, ty;
-    sx = viewSpace.width / logicSpace.width;
-    sy = viewSpace.height / logicSpace.height;
-    tx = viewSpace.x - sx * logicSpace.x;
-    ty = viewSpace.y - sy * logicSpace.y;
-        
-        
-        float radians = atan2((mouseCoordinates.y - ty), mouseCoordinates.x - tx);
+    visMatrix *= VisualizationTransf2D(logicSpace, viewSpace);
 
-    modelMatrix *= transform2D::Translate(cx, cy);
-    visMatrix *= transform2D::Rotate(radians);
-    modelMatrix *= transform2D::Translate(-cx, -cy);
     DrawScene(visMatrix);
 
-    modelMatrix = glm::mat3(1) * transform2D::Translate(150, 250);
-    RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+    // The viewport is now the right half of the window
 
-    {
-        modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(650, 250);
-        // TODO(student): Create animations by multiplying the current
-        // transform matrix with the matrices you just implemented
-        // Remember, the last matrix in the chain will take effect first!
-        angularStep += deltaTimeSeconds;
-        modelMatrix *= transform2D::Translate(cx, cy);
-        modelMatrix *= transform2D::Rotate(radians);
-        modelMatrix *= transform2D::Translate(-cx, -cy);
-        RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
-    }
+    viewSpace = ViewportSpace(resolution.x / 2, 0, resolution.x / 2, resolution.y);
+    SetViewportArea(viewSpace, glm::vec3(0.5f), true);
+
+    // Compute uniform 2D visualization matrix
+    visMatrix = glm::mat3(1);
+    visMatrix *= VisualizationTransf2DUnif(logicSpace, viewSpace);
+    DrawScene(visMatrix);
 }
 
 
@@ -171,14 +141,20 @@ void Lab3_Vis2D::FrameEnd()
 
 void Lab3_Vis2D::DrawScene(glm::mat3 visMatrix)
 {
-
-    modelMatrix = visMatrix * transform2D::Translate(70, 0) * transform2D::Scale(.3f, .3f) * transform2D::Translate(logicSpace.x, logicSpace.y);
-    RenderMesh2D(meshes["squareEye"], shaders["VertexColor"], modelMatrix);
-    modelMatrix = visMatrix * transform2D::Translate(70, 70) * transform2D::Scale(.3f, .3f) * transform2D::Translate(logicSpace.x, logicSpace.y);
-    RenderMesh2D(meshes["squareEye"], shaders["VertexColor"], modelMatrix);
-    modelMatrix = visMatrix * transform2D::Translate(0, 0) *transform2D::Translate(logicSpace.x * .3f, logicSpace.y *.3f);
+    modelMatrix = visMatrix * transform2D::Translate(0, 0);
     RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
 
+    modelMatrix = visMatrix * transform2D::Translate(3, 0);
+    RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+
+    modelMatrix = visMatrix * transform2D::Translate(1.5, 1.5);
+    RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+
+    modelMatrix = visMatrix * transform2D::Translate(0, 3);
+    RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+
+    modelMatrix = visMatrix * transform2D::Translate(3, 3);
+    RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
 }
 
 
@@ -233,8 +209,6 @@ void Lab3_Vis2D::OnKeyRelease(int key, int mods)
 void Lab3_Vis2D::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
     // Add mouse move event
-    glm::ivec2 resolution = window->GetResolution();
-    mouseCoordinates = glm::vec2(mouseX, -mouseY + resolution.y);
 }
 
 
