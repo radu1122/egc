@@ -39,15 +39,17 @@ void Lab4::Init()
     translateY = 0;
     translateZ = 0;
 
+
     // Initialize sx, sy and sz (the scale factors)
     scaleX = 1;
     scaleY = 1;
     scaleZ = 1;
 
-    // Initialize angular steps
-    angularStepOX = 0;
-    angularStepOY = 0;
-    angularStepOZ = 0;
+	// initialize angularSteps
+	angularStepOX = 0;
+	angularStepOY = 0;
+	angularStepOZ = 0;
+
 }
 
 
@@ -65,26 +67,27 @@ void Lab4::FrameStart()
 
 void Lab4::Update(float deltaTimeSeconds)
 {
-    glLineWidth(3);
-    glPointSize(5);
-    glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
+	glLineWidth(3);
+	glPointSize(5);
+	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
 
-    modelMatrix = glm::mat4(1);
-    modelMatrix *= transform3D::Translate(-2.5f, 0.5f, -1.5f);
-    modelMatrix *= transform3D::Translate(translateX, translateY, translateZ);
-    RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= transform3D::Translate(-2.5f, 0.5f, -1.5f);
+	modelMatrix *= transform3D::Translate(translateX, translateY, translateZ);
+	RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
 
-    modelMatrix = glm::mat4(1);
-    modelMatrix *= transform3D::Translate(0.0f, 0.5f, -1.5f);
-    modelMatrix *= transform3D::Scale(scaleX, scaleY, scaleZ);
-    RenderMesh(meshes["box"], shaders["Simple"], modelMatrix);
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= transform3D::Translate(0.0f, 0.5f, -1.5f);
+	modelMatrix *= transform3D::Scale(scaleX, scaleY, scaleZ);
+	RenderMesh(meshes["box"], shaders["Simple"], modelMatrix);
 
-    modelMatrix = glm::mat4(1);
-    modelMatrix *= transform3D::Translate(2.5f, 0.5f, -1.5f);
-    modelMatrix *= transform3D::RotateOX(angularStepOX);
-    modelMatrix *= transform3D::RotateOY(angularStepOY);
-    modelMatrix *= transform3D::RotateOZ(angularStepOZ);
-    RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= transform3D::Translate(2.5f, 0.5f, -1.5f);
+	modelMatrix *= transform3D::RotateOX(angularStepOX);
+	modelMatrix *= transform3D::RotateOY(angularStepOY);
+	modelMatrix *= transform3D::RotateOZ(angularStepOZ);
+	RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+
 }
 
 
@@ -103,7 +106,74 @@ void Lab4::FrameEnd()
 void Lab4::OnInputUpdate(float deltaTime, int mods)
 {
     // TODO(student): Add transformation logic
+	if (!window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
+	{
+		if (window->KeyHold(GLFW_KEY_S))
+		{
+			translateZ += deltaTime;
+		}
 
+		if (window->KeyHold(GLFW_KEY_W))
+		{
+			translateZ -= deltaTime;
+		}
+
+		if (window->KeyHold(GLFW_KEY_D))
+		{
+			translateX += deltaTime;
+		}
+
+		if (window->KeyHold(GLFW_KEY_A))
+		{
+			translateX -= deltaTime;
+		}
+		if (window->KeyHold(GLFW_KEY_R))
+		{
+			translateY += deltaTime;
+		}
+		if (window->KeyHold(GLFW_KEY_F))
+		{
+			translateY -= deltaTime;
+		}
+	}
+
+	if (window->KeyHold(GLFW_KEY_1))
+	{
+		scaleX += deltaTime;
+		scaleY += deltaTime;
+		scaleZ += deltaTime;
+	}
+	if (window->KeyHold(GLFW_KEY_2))
+	{
+		scaleX -= deltaTime;
+		scaleY -= deltaTime;
+		scaleZ -= deltaTime;
+	}
+
+	if (window->KeyHold(GLFW_KEY_3))
+	{
+		angularStepOX += deltaTime;
+	}
+	if (window->KeyHold(GLFW_KEY_4))
+	{
+		angularStepOX -= deltaTime;
+	}
+	if (window->KeyHold(GLFW_KEY_5))
+	{
+		angularStepOY += deltaTime;
+	}
+	if (window->KeyHold(GLFW_KEY_6))
+	{
+		angularStepOY -= deltaTime;
+	}
+	if (window->KeyHold(GLFW_KEY_7))
+	{
+		angularStepOZ += deltaTime;
+	}
+	if (window->KeyHold(GLFW_KEY_8))
+	{
+		angularStepOZ -= deltaTime;
+	}
 }
 
 

@@ -1,15 +1,16 @@
 #pragma once
 
 #include "components/simple_scene.h"
+#include "lab_m1/Tema2/lab_camera.h"
 
 
 namespace m1
 {
-    class Lab4 : public gfxc::SimpleScene
+    class Tema2 : public gfxc::SimpleScene
     {
      public:
-        Lab4();
-        ~Lab4();
+         Tema2();
+        ~Tema2();
 
         void Init() override;
 
@@ -18,6 +19,8 @@ namespace m1
         void Update(float deltaTimeSeconds) override;
         void FrameEnd() override;
 
+        void RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, float color[3]);
+        void DrawScene(glm::mat4 visMatrix);
         void OnInputUpdate(float deltaTime, int mods) override;
         void OnKeyPress(int key, int mods) override;
         void OnKeyRelease(int key, int mods) override;
@@ -28,12 +31,13 @@ namespace m1
         void OnWindowResize(int width, int height) override;
 
      protected:
-    protected:
-        glm::mat4 modelMatrix;
-        glm::vec3 endPos, midPos, startPos;
-        float translateX, translateY, translateZ;
-        float scaleX, scaleY, scaleZ;
-        float angularStepOX, angularStepOY, angularStepOZ;
-        GLenum polygonMode;
+        implemented::Camera *camera;
+        glm::mat4 projectionMatrix;
+        bool renderCameraTarget;
+        float playerRotation;
+        int fov, health;
+        bool isAttacking, playerDead, playerWin;
+
+
     };
 }   // namespace m1

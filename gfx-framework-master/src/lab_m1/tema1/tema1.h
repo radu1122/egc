@@ -74,6 +74,12 @@ namespace m1
         float angle;
         double time;
     };
+
+    struct healthPick {
+        float x;
+        float y;
+        double time;
+    };
     struct enemy {
         float x;
         float y;
@@ -97,11 +103,15 @@ namespace m1
         std::vector<obstacol> obstacoles;
         std::vector<projectile> projectiles;
         std::vector<enemy> enemies;
+        std::vector<healthPick> healthPicks;
+
         int health = 10;
         int score = 0;
 
         float collisionOffset = .3f;
         double lastTimeShoot = 0;
         double lastTimeEnemy = 0;
+        double lastTimeHealth = 0;
+
     };
 }   // namespace m1

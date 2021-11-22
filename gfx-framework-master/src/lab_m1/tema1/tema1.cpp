@@ -124,6 +124,10 @@ void tema1::Init()
     Mesh* healthBar = object2D::CreateSquare("healthBar", corner, squareSide, glm::vec3(.5f, .5f, .5f), true);
     AddMeshToList(healthBar);
     addObstacles();
+
+    Mesh* healthPick = object2D::CreateSquare("healthPick", corner, squareSide, glm::vec3(.5f, .5f, .2f), true);
+    AddMeshToList(healthPick);
+    addObstacles();
 }
 
 
@@ -193,7 +197,7 @@ void tema1::Update(float deltaTimeSeconds)
 
     // update pos proiectile
     for (auto it = projectiles.begin(); it != projectiles.end(); ) {
-        if (Engine::GetElapsedTime() - it->time > 1) {
+        if (Engine::GetElapsedTime() - it->time > .7f) {
             it = projectiles.erase(it);
         } else {
             it->x += cos(it->angle) * deg2rad * 4;
@@ -212,8 +216,46 @@ void tema1::Update(float deltaTimeSeconds)
     }
 
 
-    // generare inamici
     double currTime = Engine::GetElapsedTime();
+
+    // generare health picks (bonus)
+    if (currTime - lastTimeHealth > 2) {
+        lastTimeHealth = currTime;
+        healthPick healthPick;
+        healthPick.x = playerX;
+        healthPick.y = playerY - .3f;
+        healthPick.time = currTime;
+        healthPicks.push_back(healthPick);
+    }
+     //verificare timp health pick
+    for (auto it = healthPicks.begin(); it != healthPicks.end(); ) {
+        if (Engine::GetElapsedTime() - it->time > 2) {
+            it = healthPicks.erase(it);
+        }
+        else {
+           ++it;
+        }
+    }
+
+    // coliziune player health pick
+    for (auto it = healthPicks.begin(); it != healthPicks.end(); ) {
+        bool collisionX = playerX + .2f >= it->x &&
+            it->x + .15f >= playerX;
+        bool collisionY = playerY + .2f >= it->y &&
+            it->y + .15f >= playerY;
+        if (collisionX && collisionY) {
+            it = healthPicks.erase(it);
+            health = health + 1;
+            if (health > 10) {
+                health = 10;
+            }
+        }
+        else {
+            ++it;
+        }
+    }
+
+    // generare inamici
     if (currTime - lastTimeEnemy > 2) {
         lastTimeEnemy = currTime;
         int randPos = rand() / 100;
@@ -228,7 +270,7 @@ void tema1::Update(float deltaTimeSeconds)
         enemy.x = positionX;
         enemy.y = positionY;
         enemy.angle = angle;
-        enemy.speed = speed;
+        enemy.speed = speed * .2f;
 
         enemies.push_back(enemy);
     }
@@ -312,15 +354,15 @@ void tema1::DrawScene(glm::mat3 visMatrix)
     RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
 
     // health bar
-    modelMatrix = visMatrix * transform2D::Translate(playerX + 1.7f, playerY - 1) * transform2D::Scale(.1, 10 * .2f);
+    modelMatrix = visMatrix * transform2D::Translate(playerX + 1.7f, playerY - 1.0f) * transform2D::Scale(.1, 10 * .2f);
     RenderMesh2D(meshes["exteriorHealthBar"], shaders["VertexColor"], modelMatrix);
 
-    modelMatrix = visMatrix * transform2D::Translate(playerX + 1.71f, playerY - 1) * transform2D::Scale(.08f, health * .2f);
+    modelMatrix = visMatrix * transform2D::Translate(playerX + 1.71f, playerY - 1.0f) * transform2D::Scale(.08f, health * .2f);
     RenderMesh2D(meshes["healthBar"], shaders["VertexColor"], modelMatrix);
 
     // scor
     if (score > 0) {
-        modelMatrix = visMatrix * transform2D::Translate(playerX - 2, playerY - 1) * transform2D::Scale(score * .1f, .1f);
+        modelMatrix = visMatrix * transform2D::Translate(playerX - 2.0f, playerY - 1.0f) * transform2D::Scale(score * .1f, .1f);
         RenderMesh2D(meshes["healthBar"], shaders["VertexColor"], modelMatrix);
     }
 
@@ -361,6 +403,15 @@ void tema1::DrawScene(glm::mat3 visMatrix)
 
         RenderMesh2D(meshes["enemy"], shaders["VertexColor"], modelMatrix);
     }
+
+    //health picks
+    for (int i = 0; i < healthPicks.size(); i++) {
+        modelMatrix = visMatrix * transform2D::Translate(healthPicks[i].x, healthPicks[i].y);
+        modelMatrix *= transform2D::Scale(.1f, .1f);
+
+        RenderMesh2D(meshes["healthPick"], shaders["VertexColor"], modelMatrix);
+    }
+
 
 
    
