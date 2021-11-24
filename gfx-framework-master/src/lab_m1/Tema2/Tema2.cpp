@@ -25,7 +25,8 @@ Tema2::~Tema2()
 }
 
 float width = 0.0f;
-int gameMatrix[12][12] = {  {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,},
+int gameMatrix[12][12];
+int gameMatrix1[12][12] = {  {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,},
                             {-1, -1, -1, -1, -1, -1, -1, -1, -1,  0, -1, -1,},
                             { 99,  2,  0, -1, -1, -1, -1,  0,  0,  0, -1, -1,},
                             {-1, -1,  2,  0, -1,  0,  2,  0, -1,  0,  0, -1,},
@@ -38,26 +39,51 @@ int gameMatrix[12][12] = {  {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,},
                             {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,},
                             {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,} };
 
-//int gameMatrix[12][12] = { {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,},
-//                            {-1, -1, -1, -1, -1, -1, -1, -1, -1,  0, -1, -1,},
-//                            { 99,  0,  0, -1, -1, -1, -1,  0,  0,  0, -1, -1,},
-//                            {-1, -1,  0,  0, -1,  0,  2,  0, -1,  0,  0, -1,},
-//                            {-1, -1, -1,  0,  0,  0,  0, -1, -1,  0, -1, -1,},
-//                            {-1, -1, -1,  0,  0,  0,  0, -1, -1,  0, -1, -1,},
-//                            {-1, -1, -1, -1,  0,  0,  0, -1, -1,  0, -1, -1,},
-//                            {-1, -1, -1, -1,  0,  0, -1, -1, -1,  0, -1, -1,},
-//                            {-1, -1, -1, -1, -1,  0,  0,  0, -1,  0, -1, -1,},
-//                            {-1, -1, -1, -1, -1, -1, -1,  0,  0,  0, -1, -1,},
-//                            {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,},
-//                            {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,} };
+int gameMatrix2[12][12] = { {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,},
+                            {-1, -1, -1, -1, -1, -1, -1, -1, -1,  0, -1, -1,},
+                            { 99,  2,  0, -1, -1, -1, -1,  0,  0,  0, -1, -1,},
+                            {-1, -1,  2,  0, -1,  0,  2,  0, -1,  0,  0, -1,},
+                            {-1, -1, -1,  0,  0,  0,  0, -1, -1,  0, -1, -1,},
+                            {-1, 0,0,  0,  0,  0,  0, 0, 0,  0, -1, -1,},
+                            {-1, -1, -1, -1,  0,  0,  0, -1, -1,  0, -1, -1,},
+                            {-1, -1, -1, -1,  0,  0, -1, -1, -1,  0, -1, -1,},
+                            {-1, -1, -1, -1, -1,  0,  0,  0, -1,  0, -1, -1,},
+                            {-1, -1, -1, -1, -1, -1, -1,  2,  0,  0, -1, -1,},
+                            {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,},
+                            {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,} };
+
+int gameMatrix3[12][12] = { {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,},
+                            {-1, -1, 0, -1, -1, -1, -1, -1, -1,  0, -1, -1,},
+                            { 99,  2,  0, -1, -1, -1, -1,  0,  0,  0, -1, -1,},
+                            {-1, 0,  2,  0, -1,  0,  2,  0, -1,  0,  0, -1,},
+                            {-1, 0, -1,  0,  0,  0,  0, 0, -1,  0, -1, -1,},
+                            {-1, 0, -1,  0,  0,  0,  0, 0, -1,  0, -1, -1,},
+                            {-1, 0, 0, 0,  0,  0,  0, 0, -1,  0, -1, -1,},
+                            {-1, -1, 0, -1,  0,  0, 0, -1, -1,  0, -1, -1,},
+                            {-1, -1, -1, -1, -1,  0,  0,  0, -1,  0, -1, -1,},
+                            {-1, -1, -1, -1, -1, 0, -1,  2,  0,  0, -1, -1,},
+                            {-1, -1, -1, -1, 0, 0, -1, -1, -1, -1, -1, -1,},
+                            {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,} };
 
 void Tema2::Init()
 {
+    int randMap = (rand() % 3) + 1;
+
+
+
 
     for (int i = 0; i < 12; i++)
     {
         for (int j = 0; j < 12; j++)
         {
+
+            if (randMap == 1) {
+                gameMatrix[i][j] = gameMatrix1[i][j];
+            } else if (randMap == 2) {
+                gameMatrix[i][j] = gameMatrix2[i][j];
+            } else if (randMap == 3) {
+                gameMatrix[i][j] = gameMatrix3[i][j];
+            }
             float x = 0, z = 0;
             if (i <= 5) {
                 x = (float)-(5 - i);
@@ -107,7 +133,7 @@ void Tema2::Init()
 
 
     camera = new implemented::Camera();
-    camera->Set(glm::vec3(0, 1.5f, 0.3f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    camera->Set(glm::vec3(0, 1.5f, 0.1f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
     width = window->props.aspectRatio;
     {
         Mesh* mesh = new Mesh("box");
@@ -165,13 +191,27 @@ void Tema2::Update(float deltaTimeSeconds)
         return;
     }
 
-    bool collisionXWinZone = camera->GetTargetPosition()[0] * 0.7f >= winZone.x - 0.2f &&
-        winZone.x + 0.1f >= camera->GetTargetPosition()[0] * 0.7f;
-    bool collisionZWinZone = camera->GetTargetPosition()[2] >= winZone.z - 0.8f &&
-        winZone.z + 0.8f >= camera->GetTargetPosition()[2];
+    bool collisionXWinZone = true, collisionZWinZone = true;
+    if (winZone.x <= 0) {
+        collisionXWinZone = camera->GetTargetPosition()[0] * 0.66f <= winZone.x + 0.1f &&
+            winZone.x - 1.15f <= camera->GetTargetPosition()[0] * 0.66f;
+    }
+    else {
+        collisionXWinZone = camera->GetTargetPosition()[0] * 0.66f >= winZone.x - 0.1f &&
+            winZone.x + 1.15f >= camera->GetTargetPosition()[0] * 0.66f;
+    }
+    if (winZone.z <= 0) {
+        collisionZWinZone = camera->GetTargetPosition()[2] * 0.66f <= winZone.z + 0.1f &&
+            winZone.z - 1.15f <= camera->GetTargetPosition()[2] * 0.66f;
+    }
+    else {
+        collisionZWinZone = camera->GetTargetPosition()[2] * 0.66f >= winZone.z - 0.1f &&
+            winZone.z + 1.15f >= camera->GetTargetPosition()[2] * 0.66f;
+    }
 
     if (collisionXWinZone && collisionZWinZone) {
         playerWin = true;
+        cout << "Player Won!" << endl;
         return;
     }
 
@@ -193,15 +233,28 @@ void Tema2::Update(float deltaTimeSeconds)
     }
 
     for (auto it = enemies.begin(); it != enemies.end(); ) {
-        bool collisionX = camera->GetTargetPosition()[0] * 0.7f >= it->x - 0.2f &&
-            it->x + 0.1f >= camera->GetTargetPosition()[0] * 0.7f;
-        bool collisionZ = camera->GetTargetPosition()[2] >= it->z - 0.8f &&
-            it->z + 0.8f >= camera->GetTargetPosition()[2];
+        bool collisionX = true, collisionZ = true;
+        if (it->x <= 0) {
+            collisionX = camera->GetTargetPosition()[0] * 0.66f <= it->x + 0.1f &&
+                it->x - 1.15f <= camera->GetTargetPosition()[0] * 0.66f;
+        } else {
+            collisionX = camera->GetTargetPosition()[0] * 0.66f >= it->x - 0.1f &&
+                it->x + 1.15f >= camera->GetTargetPosition()[0] * 0.66f;
+        }
+        if (it->z <= 0) {
+            collisionZ = camera->GetTargetPosition()[2] * 0.66f <= it->z + 0.1f &&
+                it->z - 1.15f <= camera->GetTargetPosition()[2] * 0.66f;
+        } else {
+            collisionZ = camera->GetTargetPosition()[2] * 0.66f >= it->z - 0.1f &&
+                it->z + 1.15f >= camera->GetTargetPosition()[2] * 0.66f;
+        }
         if (collisionX && collisionZ) {
             it = enemies.erase(it);
             health = health - 1;
+            cout << "Health: " << health << endl;
             if (health <= 0) {
                 playerDead = true;
+                cout << "Game Over!" << endl;
             }
         }
         else {
@@ -220,16 +273,27 @@ void Tema2::Update(float deltaTimeSeconds)
             bool general = false;
 
             for (auto it2 = enemies.begin(); it2 != enemies.end(); ) {
-                bool collisionX = it->x * 0.7f >= it2->x - 0.2f &&
-                    it2->x + 0.1f >= it->x * 0.7f;
-                bool collisionZ = it->z >= it2->z - 0.8f &&
-                    it2->z + 0.8f >= it->z;
+                bool collisionX = true, collisionZ = true;
+                if (it->x <= 0) {
+                    collisionX = it->x * 0.66f <= it2->x + 0.1f &&
+                        it2->x - 1.15f <= it->x * 0.66f;
+                }
+                else {
+                    collisionX = it->x * 0.66f >= it2->x - 0.1f &&
+                        it2->x + 1.15f >= it->x * 0.66f;
+                }
+                if (it->z <= 0) {
+                    collisionZ = it->z * 0.66f <= it2->z + 0.1f &&
+                        it2->z - 1.15f <= it->z * 0.66f;
+                }
+                else {
+                    collisionZ = it->z * 0.66f >= it2->z - 0.1f &&
+                        it2->z + 1.15f >= it->z * 0.66f;
+                }
+
                 if (collisionX && collisionZ) {
                     it2 = enemies.erase(it2);
-                    if (health <= 0) {
-                        general = true;
-                        return;
-                    }
+                    general= true;
                 }
                 else {
                     ++it2;
@@ -466,15 +530,6 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
                 camera->TranslateRight(-cameraSpeed * deltaTime);
             }
         }
-
-        if (window->KeyHold(GLFW_KEY_Z)) {
-            fov += deltaTime;
-            projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, 0.01f, 100.0f);
-        }
-        if (window->KeyHold(GLFW_KEY_X)) {
-            fov -= deltaTime;
-            projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, 0.01f, 100.0f);
-        }
     }
 }
 
@@ -484,9 +539,16 @@ void Tema2::OnKeyPress(int key, int mods)
 
 
     if (key == GLFW_KEY_LEFT_CONTROL) {
-        fov = 30;
-        isAttacking = true;
-        projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, 0.01f, 200.0f);
+        if (fov == 30) {
+            fov = 80;
+            isAttacking = false;
+            projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, 0.01f, 200.0f);
+        } else {
+            fov = 30;
+            isAttacking = true;
+            projectionMatrix = glm::perspective(RADIANS(fov), window->props.aspectRatio, 0.01f, 200.0f);
+        }
+
     }
 }
 
@@ -519,11 +581,23 @@ bool Tema2::isObjectCollision(float x, float z) {
     bool collisionX = false, collisionZ = false, general = false;
     for (int i = 0; i < walls.size(); i++) {
 
-
-        collisionX = camera->GetTargetPosition()[0] * 0.7f >= walls[i].x - 0.2f &&
-            walls[i].x + 0.1f >= camera->GetTargetPosition()[0] * 0.7f;
-        collisionZ = camera->GetTargetPosition()[2] >= walls[i].z - 0.8f &&
-            walls[i].z + 0.8f >= camera->GetTargetPosition()[2];
+        bool collisionX = true, collisionZ = true;
+        if (walls[i].x <= 0) {
+            collisionX = camera->GetTargetPosition()[0] * 0.66f <= walls[i].x + 0.1f &&
+                walls[i].x - 1.15f <= camera->GetTargetPosition()[0] * 0.66f;
+        }
+        else {
+            collisionX = camera->GetTargetPosition()[0] * 0.66f >= walls[i].x - 0.1f &&
+                walls[i].x + 1.15f >= camera->GetTargetPosition()[0] * 0.66f;
+        }
+        if (walls[i].z <= 0) {
+            collisionZ = camera->GetTargetPosition()[2] * 0.66f <= walls[i].z + 0.1f &&
+                walls[i].z - 1.15f <= camera->GetTargetPosition()[2] * 0.66f;
+        }
+        else {
+            collisionZ = camera->GetTargetPosition()[2] * 0.66f >= walls[i].z - 0.1f &&
+                walls[i].z + 1.15f >= camera->GetTargetPosition()[2] * 0.66f;
+        }
         if (collisionX && collisionZ) {
             general = true;
         }
@@ -542,7 +616,7 @@ bool Tema2::isObjectCollision(float x, float z) {
 void Tema2::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button press event
-    if (IS_BIT_SET(button, GLFW_MOUSE_BUTTON_LEFT)) {
+    if (IS_BIT_SET(button, GLFW_MOUSE_BUTTON_LEFT) && isAttacking) {
         projectile proiectil;
 
         proiectil.x = camera->GetTargetPosition()[0];
